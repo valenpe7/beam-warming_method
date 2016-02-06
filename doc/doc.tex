@@ -1,0 +1,239 @@
+\documentclass[a4paper, 10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[width=15.50cm, height=22.00cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{esdiff}
+\usepackage{url}
+
+\title{Beam--Warming Second-Order Upwind Method}
+\author{Petr Valenta}
+\date{\today}
+
+\setlength{\parindent}{0 cm}
+\setlength{\parskip}{0 cm}
+\pagenumbering{arabic}
+\frenchspacing
+\selectlanguage{english}
+
+\newtheorem{mydef}{Definition}
+
+\begin{document}
+
+\maketitle
+{\small This document is a part of the assessment work for the subject 12DRP -- Differential Equations on Computer lectured on FNSPE CTU in Prague.}
+\begin{abstract}
+This document contains the derivation of the Beam--Warming second-order upwind method and subsequently the application of this method is demonstrated. It is used for the discretization of the linear advection and Burgers' equations and then the order of this method for both equations is examined. The stability condition and modified equation were examined only for the advection equation in accordance with the requirements. As a part of this work the scheme was also implemented in the software package MATLAB${\tiny ^{\textregistered}}$. All source files can be found at \mbox{\url{http://kfe.fjfi.cvut.cz/~valenpe7/files/12DRP}.}
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+This document concerns a specific second-order accurate upwind method proposed by Warming and Beam (1976). The Beam--Warming second-order upwind method exemplifies some of the general virtues and limitations of higher-order upwind methods \cite{laney}. In the first section one can find the derivation of this method, consequently this method is applied to discretize linear advection equation and Burgers' equation. The order of accuracy is examined for both equations as well as the implementation of schemes in software package MATLAB${\tiny ^{\textregistered}}$. The stability condition is examined and the modified equation is prepared only for the one-way wave equation. 
+
+\section{Derivation}
+In our case, let us have this governing equation
+\begin{equation}
+\label{1}
+\diffp[]{u}{t} + \diffp[]{f(u)}{x} = 0.
+\end{equation}
+To begin with derivation of the Beam--Warming second-order upwind method, consider the following Taylor series for $ u(x, t + \Delta t) $
+\begin{equation}
+\label{2}
+u(x, t + \Delta t) = u(x, t) + \Delta t \diffp[]{u}{t} + \frac{\Delta t^{2}}{2} \diffp[2]{u}{t} + O(\Delta t^{3}),
+\end{equation}
+where the time derivatives can be replaced by space derivatives using the governing equation (\ref{1}). This has been done by so called Cauchy--Kowalewski technique, which implies
+\begin{equation}
+\label{3}
+\diffp[]{u}{t} = -\diffp[]{f(u)}{x} \qquad \mathrm{and} \qquad \diffp[2]{u}{t} = \diffp[]{}{x} \left( a(u) \diffp[]{f(u)}{x} \right) \qquad \mathrm{where} \quad a(u) \equiv  \diffp[]{f(u)}{u}.
+\end{equation}
+Substitute the preceding expressions for the time derivatives (\ref{1}) into the Taylor series for $ u(x, t + \Delta t) $ (\ref{2}) to obtain
+\begin{equation}
+\label{4}
+u(x, t + \Delta t) = u(x, t) - \Delta t \diffp[]{f(u)}{x}(x, t) + \frac{\Delta t^{2}}{2} \diffp[]{}{x} \left( a(u) \diffp[]{f(u)}{x} \right)(x, t) + O(\Delta t^{3}).
+\end{equation}
+Assume a(u) > 0. To discretize the first space derivative we use 3-point second-order backward-difference for constant $ \Delta x $, which is defined as
+\begin{equation}
+\label{5}
+\diffp[]{f(u)}{x} (x_i, t^n) = \frac{3f(u_i^n) - 4f(u_{i-1}^n) + f(u_{i-2}^n)}{2 \Delta x} + O(\Delta x^{2}).
+\end{equation}
+Also let
+\begin{equation}
+\label{6}
+\diffp[]{}{x} \left( a(u) \diffp[]{f(u)}{x} \right)(x_i, t^n) = \diffp[]{}{x} \left( a(u) \diffp[]{f(u)}{x} \right)(x_{i-1}, t^n) + O(\Delta x)
+\end{equation}
+where
+\begin{equation}
+\label{7}
+\diffp[]{}{x} \left( a(u) \diffp[]{f(u)}{x} \right)(x_{i-1}, t^n) = \frac{a(u_{i-1/2}^n) \left( f(u_{i}^n) - f(u_{i-1}^n) \right) - a(u_{i-3/2}^n) \left( f(u_{i-1}^n) - f(u_{i-2}^n) \right)}{\Delta x^{2}} + O(\Delta x^{2}).
+\end{equation}
+The resulting method is as follows (substituting $ \Delta t/ \Delta x \equiv \lambda $)
+\begin{equation}
+\label{8}
+\begin{split}
+u_i^{n+1} = \:& u_i^n - \frac{\lambda}{2}\left((3f(u_i^n) - 4f(u_{i-1}^n) + f(u_{i-2}^n)\right) + \\
+& \frac{\lambda^2}{2}\left[ a(u_{i-1/2}^n) \left((f(u_{i}^n) - f(u_{i-1}^n)\right) - a(u_{i-3/2}^n) \left(f(u_{i-1}^n) - f(u_{i-2}^n)\right)\right],
+\end{split}
+\end{equation}
+which is the Beam--Warming second-order upwind method for a(u) > 0.\\
+
+Assume a(u) < 0. To discretize the first space derivative now we use 3-point second-order forward-difference, which is defined as
+\begin{equation}
+\label{9}
+\diffp[]{f(u)}{x} (x_i, t^n) = - \frac{3f(u_{i}^n) - 4f(u_{i+1}^n) + f(u_{i+2}^n)}{2 \Delta x} + O(\Delta x^{2}).
+\end{equation}
+Similar way one obtains
+\begin{equation}
+\label{10}
+\begin{split}
+u_i^{n+1} = \:& u_i^n + \frac{\lambda}{2}\left((3f(u_i^n) - 4f(u_{i+1}^n) + f(u_{i+2}^n)\right) + \\
+& \frac{\lambda^2}{2}\left[ a(u_{i+3/2}^n) \left((f(u_{i+2}^n) - f(u_{i+1}^n)\right) - a(u_{i+1/2}^n) \left(f(u_{i+1}^n) - f(u_{i}^n)\right)\right],
+\end{split}
+\end{equation}
+which is the Beam--Warming second-order upwind method for a(u) < 0 \cite{laney}.
+
+\section{Advection equation}
+The advection equation is the hyperbolic partial differential equation that governs the motion of a conserved scalar field as it is advected by a known velocity vector field. Let us consider only one space dimension and a constant velocity $ a $. The equation takes the following form
+\begin{equation}
+\label{11}
+\diffp[]{u}{t} + a \diffp[]{u}{x} = 0.
+\end{equation}
+It has clearly be seen that the function $ f(u) $, which occurs in the governing equation (\ref{1}) satisfies simple equality $ f(u) = a u $. Then one can immediately get that $ a(u) = a $.
+
+\subsection{Difference scheme}
+Now we apply Beam--Warming second-order upwind method to discretize the advection equation (\ref{11}). It gets two different forms depending on a sign of $ a $:
+\begin{equation}
+\label{12}
+\frac{u_i^{n+1} - u_i^n}{\Delta t} + a\frac{3u_i^n - 4u_{i-1}^n + u_{i-2}^n}{2 \Delta x} = \frac{a^2 \Delta t}{2} \frac{u_{i}^n - 2u_{i-1}^n + u_{i-2}^n}{\Delta x^2} \qquad \mathrm{for} \quad a > 0,
+\end{equation}
+\begin{equation}
+\label{13}
+\frac{u_i^{n+1} - u_i^n}{\Delta t} - a\frac{3u_i^n - 4u_{i+1}^n + u_{i+2}^n}{2 \Delta x} = \frac{a^2 \Delta t}{2} \frac{u_{i}^n - 2u_{i+1}^n + u_{i+2}^n}{\Delta x^2} \qquad \mathrm{for} \quad a < 0.
+\end{equation}
+
+\subsection{Order of accuracy}
+In this section we will examine the order of accuracy of the Beam--Warming scheme applied on the advection equation. Using Taylor series expansions directly on (\ref{12}) or (\ref{13}) would have resulted in terms of order $\Delta t$, $\Delta x^2$. One has to use following definition \cite{strikwerda}:
+\begin{mydef}
+A scheme $ P_{\Delta t, \Delta x} u = R_{\Delta t, \Delta x} f $ that is consistent with the differential equation $ Pu = f $ is accurate of order $ p $ in time and order $ q $ in space if for any smooth function $ \phi(t, x) $
+\begin{equation}
+\label{14}
+P_{\Delta t, \Delta x} \phi - R_{\Delta t, \Delta x} P \phi = O(\Delta t^p, \Delta x^q).
+\end{equation}
+We say that such a scheme is accurate of order ($\Delta t^p, \Delta x^q$).
+\end{mydef}
+Now we illustrate the use of this definition. From (\ref{12}) we have
+\begin{equation}
+\label{15}
+P_{\Delta t, \Delta x} \phi = \frac{\phi_i^{n+1} - \phi_i^n}{\Delta t} + a\frac{3\phi_i^n - 4\phi_{i-1}^n + \phi_{i-2}^n}{2 \Delta x} - \frac{a^2 \Delta t}{2} \frac{\phi_{i}^n - 2\phi_{i-1}^n + \phi_{i-2}^n}{\Delta x^2}
+\end{equation}
+and
+\begin{equation}
+\label{16}
+R_{\Delta t, \Delta x} f = \frac{1}{2} (f_i^{n+1} + f_i^n) - \frac{a \Delta t}{4 \Delta x} (3f_i^n - 4f_i^{n-1} + f_i^{n-2})
+\end{equation}
+We use the Taylor series on (\ref{15}) and (\ref{16}) evaluated at ($t_n,\, x_i$) to obtain
+\begin{equation}
+\label{17}
+P_{\Delta t, \Delta x} \phi = \phi_t + a \phi_x + \frac{\Delta t}{2} \phi_{tt} - \frac{a^2 \Delta t}{2} \phi_{xx} + O(\Delta t^2, \Delta x^2)
+\end{equation}
+and for a smooth function $ f(t, x) $ (\ref{16}) becomes
+\begin{equation}
+\label{18}
+R_{\Delta t, \Delta x} f = f + \frac{\Delta t}{2} f_{t} - \frac{a \Delta t}{2} f_x + O(\Delta t^2, \Delta x^2).
+\end{equation}
+In addition, $ P \phi = \phi_t + a \phi_x = f $ then
+\begin{equation}
+\label{19}
+P_{\Delta t, \Delta x} \phi - R_{\Delta t, \Delta x} P \phi = O(\Delta t^2, \Delta x^2).
+\end{equation}
+Hence the Beam--Warming scheme is accurate of order ($\Delta t^2, \Delta x^2$).
+
+\subsection{Stability}
+In this section we demonstrate the stability of Beam--Warming scheme for the one-way wave equation by using von Neumann analysis, the most popular type of linear stability analysis. Thus perform the transformation $ u_{i+k}^{n+m} \rightarrow g^m e^{ik\xi} $ in equation (\ref{12}) and obtain an isolate expression for amplification factor $ g $:
+\begin{equation}
+\begin{split}
+\label{20}
+g = \:& \mathrm{i} a^2 \lambda^2 \cos(\xi) \sin(\xi) - \mathrm{i} a^2 \lambda^2 \sin(\xi) + a^2 \lambda^2 \cos^2(\xi) + \mathrm{i} a \lambda \cos(\xi) \sin(\xi) - a^2 \lambda^2 \cos(\xi)\\ 
+& - 2 \mathrm{i} a \lambda \sin(\xi) + a \lambda \cos^2(\xi) - 2 a \lambda \cos(\xi) + a \lambda + 1.
+\end{split}
+\end{equation}
+The scheme is stable if the following condition is fulfilled: $ \forall \xi : \: \| g^2 \| < 1 $. The norm we compute by summing the squares of the real and imaginary part. Preceding condition receives the following form
+\begin{equation}
+\label{21}
+a \lambda (a \lambda + 2) (a \lambda + 1)^2 (\cos(\xi) - 1)^2 \leq 0.
+\end{equation}
+The inequality (\ref{21}) implies that the Beam--Warming scheme is stable if the Courant--Friedrichs--Lewyor (CFL) condition is fulfilled,
+\begin{equation}
+\label{22}
+\Delta t \leq 2 \frac{\Delta x}{| a |}.
+\end{equation}
+The CFL number is 2, therefor the CFL limit is larger than 1. This is the major benefit of using a wider stencil. The whole process of calculating the amplification factor can be seen in attached file \texttt{stab\_bw.mw}.
+
+\subsection{Modified equation}
+A useful technique for studying the behavior of solutions to difference equations is to model the difference equation by a differential equation. The derivation of the modified equation is closely related to the calculation of the local truncation error for a given method \cite{leveque}.\\
+
+In order to find the modified equation of the difference schemes (\ref{12}), (\ref{13}) one has to replace discrete variables using the fifth degree Taylor polynomials evaluated at ($t_n,\, x_i$). If we express the time derivatives in resulted expressions in terms of space derivatives we obtain the modified equation, which is easier to analyze
+\begin{equation}
+\label{x}
+u_t + a u_x = \frac{a}{6}\left(2 - 3 a \lambda + a^2 \lambda^2 \right) \Delta x^2 u_{xxx}.
+\end{equation}
+The modified equation is dispersive.\\
+
+For higher order methods this elimination of time derivatives in terms of space derivatives must be done carefully and is complicated by the need to include higher order terms \cite{strikwerda}. The advantage of the integrated computer algebra systems was manifested on this very spot. The entire process can be observed in attached file \texttt{modif\_bw.mw}.
+
+\section{Burgers' equation}
+Burgers' equation is a fundamental partial differential equation. It occurs in various areas of applied mathematics, such as modeling of gas dynamics and traffic flow. We will consider an inviscid type of this equation in one space dimension, which has the following form \cite{leveque}
+\begin{equation}
+\diffp[]{u}{t} + u \diffp[]{u}{x} = 0.
+\end{equation}
+It has clearly be seen that the function $ f(u) $, which occurs in the governing equation (\ref{1}) satisfies simple equality $ f(u) = u^2/2 $. Then one can immediately get that $ a(u) = u $.
+\subsection{Difference scheme}
+Now we apply Beam--Warming second-order upwind method to discretize the Burgers' equation. It gets
+\begin{equation}
+\begin{split}
+\frac{u_i^{n+1} - u_i^n}{\Delta t} & + \frac{3(u_i^n)^2 - 4(u_{i-1}^n)^2 + (u_{i-2}^n)^2}{4 \Delta x} = \\
+& \frac{\Delta t}{4 \Delta x^2} \left[ u_{i-1/2}^n \left( (u_{i}^n)^2 - (u_{i-1}^n)^2 \right) - u_{i-3/2}^n \left( (u_{i-1}^n)^2 - (u_{i-2}^n)^2 \right) \right] \qquad \mathrm{for} \quad u > 0
+\end{split}
+\end{equation}
+and
+\begin{equation}
+\begin{split}
+\frac{u_i^{n+1} - u_i^n}{\Delta t} & - \frac{3(u_i^n)^2 - 4(u_{i+1}^n)^2 + (u_{i+2}^n)^2}{4 \Delta x} = \\
+& \frac{\Delta t}{4 \Delta x^2} \left[ u_{i+3/2}^n \left( (u_{i+2}^n)^2 - (u_{i+1}^n)^2 \right) - u_{i+1/2}^n \left( (u_{i+1}^n)^2 - (u_{i}^n)^2 \right) \right] \qquad \mathrm{for} \quad u < 0.
+\end{split}
+\end{equation}
+
+\section{Conclusion}
+The implementation of the Beam--Warming second-order upwind method applied on both equations can be found in attached files \texttt{advection\_equation.m} and \texttt{burgers\_equation.m}. Unlike first-order upwind methods, higher-order upwind methods may be extremely oscillatory. In fact, higher-order upwind methods may be even more oscillatory than centered methods, as is the case comparing the Beam-Warming second-order upwind method with the Lax--Wendroff method. In their original paper, Warming and Beam (1976) recognized the oscillatory nature of their second-order upwind method. They proposed a blending that used a first-order upwind method at shocks and sonic points and their second-order upwind method in smooth regions \cite{laney}.
+
+
+\begin{thebibliography}{5}
+
+\bibitem{laney}
+  Culbert B. Laney,
+  \emph{Computational Gasdynamics}.
+  Cambridge University Press, New York,
+  1998.
+  
+\bibitem{strikwerda}
+  John C. Strikwerda,
+  \emph{Finite Difference Schemes and Partial Differential Equations}.
+  Society for Industrial and Applied Mathematics, Philadelphia,
+  2nd edition,
+  2004.
+  
+\bibitem{leveque}
+  Randall J. LeVeque,
+  \emph{Numerical Methods for Conservation Laws}.
+  Springer Basel AG,
+  2nd edition,
+  1992.
+
+\end{thebibliography}
+
+\end{document}
