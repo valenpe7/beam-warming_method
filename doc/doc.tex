@@ -158,14 +158,14 @@ In this section we demonstrate the stability of Beam--Warming scheme for the one
 \begin{equation}
 \begin{split}
 \label{20}
-g = \:& \mathrm{i} a^2 \lambda^2 \cos(\xi) \sin(\xi) - \mathrm{i} a^2 \lambda^2 \sin(\xi) + a^2 \lambda^2 \cos^2(\xi) + \mathrm{i} a \lambda \cos(\xi) \sin(\xi) - a^2 \lambda^2 \cos(\xi)\\ 
-& - 2 \mathrm{i} a \lambda \sin(\xi) + a \lambda \cos^2(\xi) - 2 a \lambda \cos(\xi) + a \lambda + 1.
+g = \:& -\mathrm{i} a^2 \lambda^2 \cos(\xi) \sin(\xi) + \mathrm{i} a^2 \lambda^2 \sin(\xi) + a^2 \lambda^2 \cos^2(\xi) + \mathrm{i} a \lambda \cos(\xi) \sin(\xi) - a^2 \lambda^2 \cos(\xi)\\ 
+& - 2 \mathrm{i} a \lambda \sin(\xi) - a \lambda \cos^2(\xi) + 2 a \lambda \cos(\xi) - a \lambda + 1.
 \end{split}
 \end{equation}
 The scheme is stable if the following condition is fulfilled: $ \forall \xi : \: \| g^2 \| < 1 $. The norm we compute by summing the squares of the real and imaginary part. Preceding condition receives the following form
 \begin{equation}
 \label{21}
-a \lambda (a \lambda + 2) (a \lambda + 1)^2 (\cos(\xi) - 1)^2 \leq 0.
+a \lambda (a \lambda - 2) (a \lambda - 1)^2 (\cos(\xi) - 1)^2 \leq 0.
 \end{equation}
 The inequality (\ref{21}) implies that the Beam--Warming scheme is stable if the Courant--Friedrichs--Lewyor (CFL) condition is fulfilled,
 \begin{equation}
